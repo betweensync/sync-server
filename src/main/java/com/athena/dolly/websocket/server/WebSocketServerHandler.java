@@ -201,7 +201,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
     
     public void sendMessageToClient(String msg) {
-    	logger.debug("Send message [%s] to client", msg);
-    	ChannelFuture future = channel.writeAndFlush(msg);
+    	logger.info("Send message to client" + msg);
+    	if( channel != null) {
+    		ChannelFuture future = channel.writeAndFlush(msg);
+    	}
     }
 }
