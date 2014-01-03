@@ -132,7 +132,7 @@ public class ChangesEventListener {
 								do {
 									String docId = change.getId();
 									JsonNode changedDoc = change.getDocAsNode();
-									logger.debug(changedDoc + ", seq=" + change.getStringSequence());
+									logger.info(changedDoc + ", seq=" + change.getStringSequence());
 									
 									/**********************************************************/
 									// Send signal to client with Netty Web Socket
