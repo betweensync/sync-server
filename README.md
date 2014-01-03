@@ -41,7 +41,7 @@ Netty Web Socket server binds port 7700
 
 **6. TO-DO List(Eggboy)**
 
-1. WebSocketServerHandler is connected to S3Service for sending file to Amazon S3
+- WebSocketServerHandler is connected to S3Service for sending file to Amazon S3
 
 ```
 	/**
@@ -56,7 +56,7 @@ Netty Web Socket server binds port 7700
     }
 ```
 
-2. Fill codes that should send message to client in WebSocketServerHandler
+- Fill codes that should send message to client in WebSocketServerHandler
 
 ```
     public void sendMessageToClient(String msg) {
