@@ -7,7 +7,7 @@
 	<!-- Append messages to the console -->
 	<!-- ============================== -->
 
-	<appender name="ATHENA_PEACOCK_CONSOLE" class="org.apache.log4j.ConsoleAppender">
+	<appender name="ATHENA_DOLLY_CONSOLE" class="org.apache.log4j.ConsoleAppender">
 		<param name="Target" value="System.out"/>
 		<param name="Threshold" value="DEBUG"/>
 		<layout class="org.apache.log4j.PatternLayout">
@@ -15,9 +15,9 @@
 		</layout>
 	</appender>
 
-	<appender name="ATHENA_PEACOCK_FILE" class="org.apache.log4j.DailyRollingFileAppender">
+	<appender name="ATHENA_DOLLY_FILE" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="File" value="${logging.directory}/athena-storage-sync.log"/>
-		<param name="Threshold" value="INFO"/>
+		<param name="Threshold" value="DEBUG"/>
 		<param name="Append" value="false"/>
 		<param name="DatePattern" value="'.'yyyy-MM-dd"/>
 		<layout class="org.apache.log4j.PatternLayout">
@@ -30,6 +30,10 @@
 	<!-- ================ -->
 	<category name="com.athena.dolly">
 		<priority value="DEBUG"/>
+	</category>
+	
+	<category name="org.springframework.jms">
+		<priority value="ERROR"/>
 	</category>
 
 	<category name="org.apache.commons.beanutils">
@@ -49,8 +53,8 @@
 	<!-- Setup the Root category -->
 	<!-- ======================= -->
 	<root>
-		<appender-ref ref="ATHENA_PEACOCK_FILE"/>
-		<appender-ref ref="ATHENA_PEACOCK_CONSOLE"/>
+		<appender-ref ref="ATHENA_DOLLY_FILE"/>
+		<appender-ref ref="ATHENA_DOLLY_CONSOLE"/>
 	</root>
 
 </log4j:configuration>
