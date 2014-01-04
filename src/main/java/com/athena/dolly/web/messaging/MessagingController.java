@@ -47,8 +47,8 @@ import com.athena.dolly.web.common.model.SimpleJsonResponse;
 
 /**
  * <pre>
- * This is a controller for RHEV-M API.
- * RHEV-M API를 이용한 작업을 수행하는 컨트롤러
+ * This is a controller for Active MQ API.
+ * Active MQ API를 이용한 작업을 수행하는 컨트롤러
  * </pre>
  * @author Ji-Woong Choi
  * @version 1.0
@@ -74,7 +74,7 @@ public class MessagingController {
 		
 	/**
 	 * <pre>
-	 * 지정된 RHEV-M(rhevmId)에 해당하는 Virtual Machine 목록을 조회
+	 * Return Dummy file list
 	 * </pre>
 	 * @param jsonRes
 	 * @param machineId
