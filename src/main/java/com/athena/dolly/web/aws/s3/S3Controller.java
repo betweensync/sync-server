@@ -24,6 +24,7 @@
  */
 package com.athena.dolly.web.aws.s3;
 
+import java.net.URL;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -65,10 +66,10 @@ public class S3Controller {
 		
 	/**
 	 * <pre>
-	 * 지정된 RHEV-M(rhevmId)에 해당하는 Virtual Machine 목록을 조회
+	 * List objects specified bucket
 	 * </pre>
 	 * @param jsonRes
-	 * @param machineId
+	 * @param bucketName
 	 * @return
 	 * @throws Exception
 	 */
@@ -87,29 +88,8 @@ public class S3Controller {
 		return jsonRes;
 	}
 	
-	/**
-	 * <pre>
-	 * 지정된 RHEV-M(rhevmId)에 해당하는 Virtual Machine 목록을 조회
-	 * </pre>
-	 * @param jsonRes
-	 * @param machineId
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping("/create")
-	public @ResponseBody SimpleJsonResponse list(SimpleJsonResponse jsonRes) throws Exception {
-		// 아래는 향후 Multi RHEV-M을 컨트롤할 때 rhevmId를 입력받아 처리하도록 함
-		//Assert.isTrue(!StringUtils.isEmpty(vms.getRhevmId()), "rhevmId must not be null.");
-		s3Service.putObject("ienvyou", "temp/logo.png", "C:/OpenSourceConsulting/OSC-Logo.png");
-		
-		jsonRes.setData("Create Data Success");
-		return jsonRes;
-	}
-	
-	
 	@RequestMapping("/get")
 	public @ResponseBody SimpleJsonResponse get(SimpleJsonResponse jsonRes, @RequestParam String bucketName, @RequestParam String key) throws Exception {
-		// 아래는 향후 Multi RHEV-M을 컨트롤할 때 rhevmId를 입력받아 처리하도록 함
 		Assert.isTrue(!StringUtils.isEmpty(bucketName), "bucketName must not be null.");
 		Assert.isTrue(!StringUtils.isEmpty(key), "key must not be null.");
 		
@@ -120,5 +100,67 @@ public class S3Controller {
 		return jsonRes;
 	}
 	
+	
+	/**
+	 * <pre>
+	 * Change Object ACL to public access
+	 * </pre>
+	 * @param jsonRes
+	 * @param bucketName
+	 * @param key
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/acl/public")
+	public @ResponseBody SimpleJsonResponse aclPublic(SimpleJsonResponse jsonRes, @RequestParam String bucketName, @RequestParam String key) throws Exception {
+		Assert.isTrue(!StringUtils.isEmpty(bucketName), "bucketName must not be null.");
+		Assert.isTrue(!StringUtils.isEmpty(key), "key must not be null.");
+		s3Service.changeAclToPublic(bucketName, key);
+		
+		jsonRes.setData("Change ACL Success for " + key);
+		return jsonRes;
+	}
+	
+	/**
+	 * <pre>
+	 * Change Object ACL to private access
+	 * </pre>
+	 * @param jsonRes
+	 * @param bucketName
+	 * @param key
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/acl/private")
+	public @ResponseBody SimpleJsonResponse aclPrivate(SimpleJsonResponse jsonRes, @RequestParam String bucketName, @RequestParam String key) throws Exception {
+		Assert.isTrue(!StringUtils.isEmpty(bucketName), "bucketName must not be null.");
+		Assert.isTrue(!StringUtils.isEmpty(key), "key must not be null.");
+		s3Service.changeAclToPrivate(bucketName, key);
+		
+		jsonRes.setData("Change ACL Success for " + key);
+		return jsonRes;
+	}
+	
+	/**
+	 * Generates a signed download URL for key(file) that will work for 1 hour.
+	 * @param jsonRes
+	 * @param bucketName
+	 * @param key
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/presigned")
+	public @ResponseBody SimpleJsonResponse presignedUrl(SimpleJsonResponse jsonRes, @RequestParam String bucketName, @RequestParam String key) throws Exception {
+		Assert.isTrue(!StringUtils.isEmpty(bucketName), "bucketName must not be null.");
+		Assert.isTrue(!StringUtils.isEmpty(key), "key must not be null.");
+		URL url = s3Service.presignedUrl(bucketName, key);
+		
+		jsonRes.setData(url);
+		jsonRes.setMsg("Presigned URL creating success");
+		return jsonRes;
+	}
+	
+	
+
 	
 }
