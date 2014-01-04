@@ -25,14 +25,13 @@
 package com.athena.dolly.web.aws.s3;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.net.URL;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -41,10 +40,22 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 @Service("s3Service")
 public class S3Service {
+	
+	protected final Logger logger = LoggerFactory.getLogger(S3Service.class);
 
+	@Value("#{contextProperties['temp.dir']}")
+	private String tempDir;
+	
 	@Value("#{contextProperties['aws.access.key']}")
 	private String accessKey;
 
@@ -66,6 +77,16 @@ public class S3Service {
 	 */
 	public List<Bucket> listBuckets() {
 		return s3.listBuckets();
+	}
+	
+	/**
+	 * Retrieve object summaries in specific bucket
+	 * @param bucketName
+	 * @return
+	 */
+	public List<S3ObjectSummary> listBucket(String bucketName) {
+		ObjectListing objectListing = s3.listObjects(new ListObjectsRequest().withBucketName(bucketName));
+		return objectListing.getObjectSummaries();
 	}
 
 	/**
@@ -97,27 +118,55 @@ public class S3Service {
 		File file = new File(fileName);
 		s3.putObject(bucketName, key, file);
 	}
+	
 
 	/**
-	 * Creates a temporary file with text data to demonstrate uploading a file
-	 * to Amazon S3
-	 * 
-	 * @return A newly created temporary file with text data.
-	 * 
-	 * @throws IOException
+	 * Getting file from s3 using key. File will be saved in temporary directory you configured
+	 * @param bucketName
+	 * @param key
 	 */
-	private static File createSampleFile() throws IOException {
-		File file = File.createTempFile("aws-java-sdk-", ".txt");
-		file.deleteOnExit();
+	public File getObject(String bucketName, String key) {
+		
+		String tempFileName = tempDir + File.separator + key.substring(key.lastIndexOf("/") + 1);
+		File tempFile = new File(tempFileName);
+		ObjectMetadata object = s3.getObject(new GetObjectRequest(bucketName, key),
+											 tempFile
+						                    );
+        return tempFile;
 
-		Writer writer = new OutputStreamWriter(new FileOutputStream(file));
-		writer.write("abcdefghijklmnopqrstuvwxyz\n");
-		writer.write("01234567890112345678901234\n");
-		writer.write("!@#$%^&*()-=[]{};':',.<>/?\n");
-		writer.write("01234567890112345678901234\n");
-		writer.write("abcdefghijklmnopqrstuvwxyz\n");
-		writer.close();
-
-		return file;
 	}
+	
+	/**
+	 * Change object ACL to public read
+	 * @param bucketName
+	 * @param key
+	 */
+	public void changeAclToPublic(String bucketName, String key) {
+		s3.setObjectAcl(bucketName, key, CannedAccessControlList.PublicRead);
+	}
+	
+	/**
+	 * Change object ACL to private
+	 * @param bucketName
+	 * @param key
+	 */
+	public void changeAclToPrivate(String bucketName, String key) {
+		s3.setObjectAcl(bucketName, key, CannedAccessControlList.Private);
+	}
+	
+	/**
+	 *  This generates a signed download URL for key(file) that will work for 1 hour.
+	 * @param bucketName
+	 * @param key
+	 * @return
+	 */
+	public URL presignedUrl(String bucketName, String key) {
+		GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, key);
+		URL url = s3.generatePresignedUrl(request);
+		return url;
+		
+	}
+	
+
+	
 }
