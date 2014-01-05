@@ -75,9 +75,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private static final AttributeKey<String> USERID = AttributeKey.valueOf("channel.userid");
 
-    private static final int HEADERSIZE_USERID = 64;
-    private static final int HEADERSIZE_ABSOLUTEPATH = 64;
-    private static final int HEADERSIZE_FILESIZE = 64;
+    private static final int HEADERSIZE_USERID = 32;
+    private static final int HEADERSIZE_ABSOLUTEPATH = 128;
+    private static final int HEADERSIZE_FILESIZE = 32;
 
     public WebSocketServerHandler() {
         this.channelClientMap = new ConcurrentHashMap(1024);
@@ -111,7 +111,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             return;
         }
 
-        // Handshake
+        // WebSocket Handshake
         WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, false, Integer.MAX_VALUE);
         handshaker = wsFactory.newHandshaker(req);
 
@@ -149,7 +149,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
         if ((frame instanceof BinaryWebSocketFrame)) {
             handleBinaryMessageFromClient(ctx, frame);
-            return;
         }
     }
 
