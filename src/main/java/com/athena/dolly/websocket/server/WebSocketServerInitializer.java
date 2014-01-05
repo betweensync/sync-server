@@ -23,9 +23,7 @@ public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast("codec-http", new HttpServerCodec());
         pipeline.addLast("aggregator", new HttpObjectAggregator(65536)); // == Netty 3.0 HttpChunkAggregator
-        //pipeline.addLast("aggregator-websocket", new WebSocketFrameAggregator(65536));
+        //pipeline.addLast("aggregator-websocket", new WebSocketFrameAggregator(65536)); -- ContinuationFrame
         pipeline.addLast("handler", handler);
-        
-        //WebSocketFrameAggregator
     }
 }

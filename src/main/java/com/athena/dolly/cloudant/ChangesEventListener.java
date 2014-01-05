@@ -138,7 +138,7 @@ public class ChangesEventListener {
 									// Send signal to client with Netty Web Socket
 									/**********************************************************/
 									WebSocketServerHandler handler = AppContext.getBean(WebSocketServerHandler.class);
-									handler.sendMessageToClient(changedDoc.toString());
+									handler.sendMessageToClient(changedDoc);
 									
 									try {
 										newChange = feed.poll();
