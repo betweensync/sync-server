@@ -89,7 +89,7 @@ public class ChangesEventListener {
 					CouchDbConnector conn = dbInst.createConnector("a_samsung_file", true);
 					CouchDbConnector connSeq = dbInst.createConnector("a_seq", true);
 
-					JsonNode a_samsung_file = (JsonNode) connSeq.find(JsonNode.class, "a_samsung_file");
+					JsonNode a_samsung_file = (JsonNode) connSeq.find(JsonNode.class, "samsung_file");
 					ChangesCommand cmd = null;
 					if (a_samsung_file != null) {
 						logger.info("Since: " + a_samsung_file.get("seq").textValue());
@@ -150,7 +150,7 @@ public class ChangesEventListener {
 									if (a_samsung_file == null) {
 										ObjectMapper om = new ObjectMapper();
 										a_samsung_file = om.createObjectNode();
-										((ObjectNode) a_samsung_file).put("_id", "a_samsung_file");
+										((ObjectNode) a_samsung_file).put("_id", "samsung_file");
 										((ObjectNode) a_samsung_file).put("seq", change.getStringSequence());
 										connSeq.create(a_samsung_file);
 									} else {
@@ -159,8 +159,10 @@ public class ChangesEventListener {
 									}
 								}
 								catch(Exception e) {
+									a_samsung_file = (JsonNode) connSeq.find(JsonNode.class, "samsung_file");
 									e.printStackTrace();
 								}
+								logger.info("a_samsung_file.seq=" + a_samsung_file.get("seq")
 							}
 						}
 						// end of if
