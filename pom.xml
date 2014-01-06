@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>storage-sync</artifactId>
+	<artifactId>sync-server</artifactId>
 	<groupId>athena</groupId>
 	<packaging>war</packaging>
 	<version>0.0.1</version>
@@ -337,13 +337,13 @@
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
-			<version>1.9.8</version>
+			<version>1.9.13</version>
 		</dependency>
             
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.8</version>
+			<version>1.9.13</version>
 		</dependency>
             
 		<dependency>
