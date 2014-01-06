@@ -5,22 +5,22 @@
 	data-fq_path="">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
 <script type="text/javascript">
-                window._document_observe_listeners = [];
-                document.observe = function(event, func) {
-                    window._document_observe_listeners.push({event: event, func: func});
-                };
-
-                window._jquery_ready_handlers = [];
-                jQuery = function(handler) {
-                    window._jquery_ready_handlers.push(handler);
-                };
-
-                function on_script_loaded(func) {
-                    (window.LoadedJsSuccessfully && document.loaded) ? func() : document.observe('script:loaded', func);
-                }
-                </script>
-
+	window._document_observe_listeners = [];
+	document.observe = function(event, func) {
+	    window._document_observe_listeners.push({event: event, func: func});
+	};
+	
+	//window._jquery_ready_handlers = [];
+	//jQuery = function(handler) {
+	//    window._jquery_ready_handlers.push(handler);
+	//};
+	
+	function on_script_loaded(func) {
+	    (window.LoadedJsSuccessfully && document.loaded) ? func() : document.observe('script:loaded', func);
+	}
+</script>
 <link href="./css/main.css" type="text/css"	rel="stylesheet">
 <link href="./css/web_sprites.css" type="text/css"	rel="stylesheet">
 <script type="text/javascript">window.ST=+new Date();</script>
@@ -34,17 +34,81 @@
 </style>
 
 <script>
-                if (self != top) {
-                    top.location.replace(self.location.href);
-                    setTimeout(function() {
-                        document.body.innerHTML = (
-                            "<img src='images/dolly-icon.png' onClick='top.location.href=window.location.href' />");
-                    }, 1);
-                }
-            </script>
+    if (self != top) {
+        top.location.replace(self.location.href);
+        setTimeout(function() {
+            document.body.innerHTML = (
+                "<img src='images/dolly-icon.png' onClick='top.location.href=window.location.href' />");
+        }, 1);
+    }
+    
+    var liTag;
+    
+    $(function() {
+    	
+    	var loading = $("#search-location");
+    	$( document ).ajaxStart(function(){
+    		loading.show();
+    	});
+    	$( document ).ajaxStop(function(){
+    		loading.hide();
+    	});
+    	
+    	liTag = $("#browse-files li");
+	
+	    $.ajax({
+    		  url: "aws/s3/list",
+    		  dataType: 'json',
+    		  type: 'get',
+    		  data: {
+    			  bucketName: 'ienvyou'
+    		  },
+    		  error: function(jqXHR, textStauts, errorThrown){
+    			  alert("server error.");
+    		  },
+    		  success: function( jsonObj ) {
+    			  
+    		    $.each(jsonObj.list, function(index, item){
+    		    	
+    		    	var li = makeLiTag(item);
+    		    	
+    		    	$("#browse-files").append(li);
+    		    });
+    		  }
+    	});
+    });
+    
+    function makeLiTag(item){
+    	var li = liTag.clone();
+    	li.show();
+    	
+    	li.attr("title", item.key);
+    	li.find("a").text(item.key);
+    	li.find("span.modified-time").text(item.lastModified);
+    	li.find("span.category").text(item.dataType);
+    	li.find("img").attr("src", iconFileName(item.dataType, item.key));
+    	
+    	return li;
+    }
+    
+    function iconFileName(dataType, key){
+    	if(dataType == 'folder'){
+    		return "images/folder-blue.png";
+    	}else if(endsWith(key, "docx")){
+    		return "images/word-icon.png";
+    	}else if(endsWith(key, "pdf")){
+    		return "images/pdf-icon.png";
+    	}else{
+    		return "images/file-icon.png";
+    	}
+    }
+    
+    function endsWith(str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    }
+</script>
 </head>
-<body class="ko earthrise extended-header webkit"
-	style="min-height: 731px;">
+<body class="ko earthrise extended-header webkit" style="min-height: 731px;">
 	<div id="outer-frame">
 		<div id="page-header" class=" minimal-header">
 			<div id="inner-page-header">
@@ -93,8 +157,8 @@
 						<div id="browse-global-actions-bar">
 							<div id="browse-location" class="page-header-text">Sync List
 							</div>
-							<div id="search-location" class="page-header-text">
-								<span id="web-search-results"></span>
+							<div id="search-location" class="page-header-text" >
+								<span id="web-search-results"><img src="images/ajax-loader.gif"/></span>
 							</div>
 						</div>
 
@@ -121,49 +185,17 @@
 					</div>
 
 					<ol id="browse-files" style="cursor: default;" class="mouse-active">
-						<li class="browse-file  " data-identity="293499715_9"  id="f_293499715_9">
+						<li class="browse-file" title="" style="display: none;">
 							<div class="filename-col">
-								<img class="sprite sprite_web s_web_folder_32 icon" alt="JBoss"  src="./images/folder-blue.png"> 
-								    <a href="JBoss" class="filename-link"  target="_self">JBoss</a>
+								<img class="sprite sprite_web s_web_page_white_word_32 icon" src="./images/word-icon.png"> 
+								<a href="https://s3.amazonaws.com/get/%5B%EC%98%A4%ED%94%88%EC%86%8C%EC%8A%A4%EC%BB%A8%EC%84%A4%ED%8C%85%5DJBoss_EWS_Admin%20password%20%EB%B3%80%EA%B2%BD_v1.docx?w=AAB3R50XNV7YWgz-3tfytgxLekVKrQ1y3-CfQyPOVegljQ"
+									class="filename-link" target="_blank">--</a>
 							</div>
 							<div class="kind">
-								<span class="category">폴더</span>
+								<span class="category">문서</span>
 							</div>
 							<div class="modified">
 								<span class="modified-time">--</span>
-							</div> <br class="clear">
-						</li>
-						<li class="browse-file  " data-identity="293499715_1" id="f_293499715_1"
-							title="[오픈소스컨설팅]JBoss_EWS_Admin password 변경_v1.docx">
-							<div class="filename-col">
-								<img class="sprite sprite_web s_web_page_white_word_32 icon"
-									alt="[오픈소스컨설팅]JBoss_EWS_Admin p…경_v1.docx" 
-									src="./images/word-icon.png"> <a
-									href="https://s3.amazonaws.com/get/%5B%EC%98%A4%ED%94%88%EC%86%8C%EC%8A%A4%EC%BB%A8%EC%84%A4%ED%8C%85%5DJBoss_EWS_Admin%20password%20%EB%B3%80%EA%B2%BD_v1.docx?w=AAB3R50XNV7YWgz-3tfytgxLekVKrQ1y3-CfQyPOVegljQ"
-									class="filename-link" 
-									target="_blank">[오픈소스컨설팅]JBoss_EWS_Admin p…경_v1.docx</a>
-							</div>
-							<div class="kind">
-								<span class="category">문서</span>
-							</div>
-							<div class="modified">
-								<span class="modified-time">2013/7/1 오후 10:14</span>
-							</div> <br class="clear">
-						</li>
-						<li class="browse-file  " data-identity="293499715_21"	id="f_293499715_21">
-							<div class="filename-col">
-								<img class="sprite sprite_web s_web_page_white_acrobat_32 icon"
-									alt="basic-CRUD.pdf" 
-									src="./images/pdf-icon.png"> <a
-									href="https://s3.amazonaws.com/get/basic-CRUD.pdf?w=AADcPc3eHtlWGITNk2aRLG6IdpWbo51tDfLnwItjYiSDDQ"
-									class="filename-link"
-									target="_blank">basic-CRUD.pdf</a>
-							</div>
-							<div class="kind">
-								<span class="category">문서</span>
-							</div>
-							<div class="modified">
-								<span class="modified-time">2013/12/23 오후 12:49</span>
 							</div> <br class="clear">
 						</li>
 					</ol>
