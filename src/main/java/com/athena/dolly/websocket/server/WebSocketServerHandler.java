@@ -201,7 +201,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        channelClientMap.remove(ctx.channel().attr(USERID).get());
+        if(ctx.channel().attr(USERID).get() != null) channelClientMap.remove(ctx.channel().attr(USERID).get());
         logger.debug("User {}/{} is logged out. Current Session Count : {}", ctx.channel().attr(USERID).get(), ctx.channel().remoteAddress(), channelClientMap.size());
     }
 
