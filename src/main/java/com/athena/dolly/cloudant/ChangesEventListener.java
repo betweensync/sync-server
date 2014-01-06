@@ -162,7 +162,7 @@ public class ChangesEventListener {
 									a_samsung_file = (JsonNode) connSeq.find(JsonNode.class, "samsung_file");
 									e.printStackTrace();
 								}
-								logger.info("a_samsung_file.seq=" + a_samsung_file.get("seq")
+								logger.info("a_samsung_file.seq=" + a_samsung_file.get("seq");
 							}
 						}
 						// end of if
