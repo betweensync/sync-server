@@ -146,16 +146,20 @@ public class ChangesEventListener {
 										e.printStackTrace();
 									}
 								} while (newChange != null);
-
-								if (a_samsung_file == null) {
-									ObjectMapper om = new ObjectMapper();
-									a_samsung_file = om.createObjectNode();
-									((ObjectNode) a_samsung_file).put("_id", "a_samsung_file");
-									((ObjectNode) a_samsung_file).put("seq", change.getStringSequence());
-									connSeq.create(a_samsung_file);
-								} else {
-									((ObjectNode) a_samsung_file).put("seq", change.getStringSequence());
-									connSeq.update(a_samsung_file);
+								try {
+									if (a_samsung_file == null) {
+										ObjectMapper om = new ObjectMapper();
+										a_samsung_file = om.createObjectNode();
+										((ObjectNode) a_samsung_file).put("_id", "a_samsung_file");
+										((ObjectNode) a_samsung_file).put("seq", change.getStringSequence());
+										connSeq.create(a_samsung_file);
+									} else {
+										((ObjectNode) a_samsung_file).put("seq", change.getStringSequence());
+										connSeq.update(a_samsung_file);
+									}
+								}
+								catch(Exception e) {
+									e.printStackTrace();
 								}
 							}
 						}
