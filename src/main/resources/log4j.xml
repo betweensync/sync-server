@@ -9,7 +9,7 @@
 
 	<appender name="ATHENA_DOLLY_CONSOLE" class="org.apache.log4j.ConsoleAppender">
 		<param name="Target" value="System.out"/>
-		<param name="Threshold" value="DEBUG"/>
+		<param name="Threshold" value="INFO"/>
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss}] [%5p] [%c{1}.%M():%L] - %m%n"/>
 		</layout>
