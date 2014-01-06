@@ -1,5 +1,7 @@
 package com.athena.dolly.websocket.server;
 
+import com.athena.dolly.common.provider.AppContext;
+import com.athena.dolly.web.aws.s3.S3Service;
 import com.athena.dolly.websocket.server.message.SyncMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,6 +42,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -223,11 +226,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 ByteBuffer byteBuffer = ByteBuffer.allocate(fileSize);
                 String tmpFileAbsolutePath = TMP_FILE_ROOT_PATH + "/" + userId + absolutePath;
                 String tmpFilePath = tmpFileAbsolutePath.substring(0, tmpFileAbsolutePath.lastIndexOf("/"));
-                
+
                 // 경로 만들기
-                if(new File(tmpFilePath).mkdirs())
+                if (new File(tmpFilePath).mkdirs()) {
                     logger.debug("Directory is created : {}", tmpFilePath);
-                
+                }
+
                 RandomAccessFile targetFile = new RandomAccessFile(tmpFileAbsolutePath, "rw");
                 frame.content().readBytes(byteBuffer);
                 FileChannel inChannel = targetFile.getChannel();
@@ -285,17 +289,21 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      * @param localFile Temporary file which is in local tmp directory
      */
     protected void synchronizeStorage(String userId, String path, String localFile) {
-//    	S3Service s3Service = AppContext.getBean("s3Service", S3Service.class);
-//      s3Service.putObject(userId, path.substring(0,path.lastIndexOf("/")), localFile);
-//    	logger.debug(s3Service.listBuckets().toString());
+        S3Service s3Service = AppContext.getBean("s3Service", S3Service.class);
+        s3Service.putObject(userId, path.substring(1, path.length()), localFile);
+        logger.debug(s3Service.listBuckets().toString());
     }
 
     public void sendMessageToClient(JsonNode msg) {;
         ObjectMapper mapper = new ObjectMapper();
-        String userid = msg.get("sFile").textValue();
+        String userid = msg.get("userid").textValue();
+        String absolutePath = msg.get("absolutePath").textValue();
+        ArrayList<String> fileList = new ArrayList<String>();
+        fileList.add(absolutePath);
         SyncMessage msgToClient = new SyncMessage();
         msgToClient.setUserid(userid);
         msgToClient.setOpcode(WebSocketResource.OPCODE_TRANSFER_INSERT);
+        msgToClient.setsFileList(fileList);
 
         try {
             Channel clientChannel = channelClientMap.get(userid);
