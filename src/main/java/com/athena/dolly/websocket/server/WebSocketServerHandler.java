@@ -295,24 +295,32 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     public void sendMessageToClient(JsonNode msg) {
-        logger.info("sendMessageToClient", msg.textValue());
-        ObjectMapper mapper = new ObjectMapper();
-        String userid = msg.get("userid").textValue();
-        String absolutePath = msg.get("absolutePath").textValue();
-        ArrayList<String> fileList = new ArrayList<String>();
-        fileList.add(absolutePath);
-        SyncMessage msgToClient = new SyncMessage();
-        msgToClient.setUserid(userid);
-        msgToClient.setOpcode(WebSocketResource.OPCODE_TRANSFER_INSERT);
-        msgToClient.setsFileList(fileList);
+    	
+    	JsonNode opcode = msg.get("deleted");
+    	
+    	if(opcode != null && !"true".equals(opcode.textValue())) {
+            logger.info("sendMessageToClient", msg.textValue());
+            ObjectMapper mapper = new ObjectMapper();
+            String userid = msg.get("userid").textValue();
+            String absolutePath = msg.get("absolutePath").textValue();
+            ArrayList<String> fileList = new ArrayList<String>();
+            fileList.add(absolutePath);
+            SyncMessage msgToClient = new SyncMessage();
+            msgToClient.setUserid(userid);
+            msgToClient.setOpcode(WebSocketResource.OPCODE_TRANSFER_INSERT);
+            msgToClient.setsFileList(fileList);
 
-        try {
-            Channel clientChannel = channelClientMap.get(userid);
-            if (clientChannel != null && clientChannel.isOpen()) {
-                clientChannel.writeAndFlush(new TextWebSocketFrame(mapper.writeValueAsString(msgToClient)));
+            try {
+                Channel clientChannel = channelClientMap.get(userid);
+                if (clientChannel != null && clientChannel.isOpen()) {
+                    clientChannel.writeAndFlush(new TextWebSocketFrame(mapper.writeValueAsString(msgToClient)));
+                }
+            } catch (JsonProcessingException ex) {
+                logger.info("Json Processing Error", ex);
             }
-        } catch (JsonProcessingException ex) {
-            logger.info("Json Processing Error", ex);
-        }
+    	}
+    	
+    	
+
     }
 }
