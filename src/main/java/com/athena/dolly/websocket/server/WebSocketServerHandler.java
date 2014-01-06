@@ -296,9 +296,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     public void sendMessageToClient(JsonNode msg) {
     	logger.info("Send Message To Client : {}", msg);
-    	JsonNode opcode = msg.get("deleted");
-    	
-    	if(opcode == null) {
+
+    	if(msg.get("deleted") == null && msg.get("_deleted")) {
             logger.info("sendMessageToClient", msg.textValue());
             ObjectMapper mapper = new ObjectMapper();
             String userid = msg.get("userid").textValue();
