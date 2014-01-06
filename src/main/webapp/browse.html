@@ -61,7 +61,8 @@
     		  dataType: 'json',
     		  type: 'get',
     		  data: {
-    			  bucketName: 'ienvyou'
+    			  bucketName: 'cloudantdemo',
+    			  key: 'mnt/sdcard/DCIM/Camera'
     		  },
     		  error: function(jqXHR, textStauts, errorThrown){
     			  alert("server error.");
@@ -84,6 +85,7 @@
     	
     	li.attr("title", item.key);
     	li.find("a").text(item.key);
+    	li.find("a.filename-link").attr("href", item.url);
     	li.find("span.modified-time").text(item.lastModified);
     	li.find("span.category").text(item.dataType);
     	li.find("img").attr("src", iconFileName(item.dataType, item.key));

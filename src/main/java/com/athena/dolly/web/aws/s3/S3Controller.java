@@ -25,7 +25,12 @@
 package com.athena.dolly.web.aws.s3;
 
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,8 +44,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.athena.dolly.web.common.model.GridJsonResponse;
 import com.athena.dolly.web.common.model.SimpleJsonResponse;
@@ -74,18 +77,103 @@ public class S3Controller {
 	 * @throws Exception
 	 */
 	@RequestMapping("/list")
-	public @ResponseBody GridJsonResponse list(GridJsonResponse jsonRes, @RequestParam String bucketName) throws Exception {
-		// 아래는 향후 Multi RHEV-M을 컨트롤할 때 rhevmId를 입력받아 처리하도록 함
+	public @ResponseBody GridJsonResponse list(GridJsonResponse jsonRes, @RequestParam String bucketName, String key) throws Exception {
 		Assert.isTrue(!StringUtils.isEmpty(bucketName), "bucketName must not be null.");
+	
+		logger.debug("Bucket Name: " + bucketName + ", key: " + key);
 		
-		List<S3ObjectSummary> objectList = s3Service.listBucket(bucketName);
-		for (S3ObjectSummary objectSummary : objectList) {
-		    logger.info(" - " + objectSummary.getKey() + "  " +
-		                       "(size = " + objectSummary.getSize() + ")");
+		List<S3Dto> list  = s3Service.listBucket(bucketName, key);
+		
+		
+		jsonRes.setTotal(list.size());
+		jsonRes.setList(list);
+		return jsonRes;
+	}
+	
+	
+	
+	public static void main(String [] args) throws Exception {
+		
+		//String [] keys = {"directory/", "directory/browse.png", "peacock.mp4", "temp/logo.png", "temp/subdir/", "temp/subdir/index.png"};
+		//String [] keys = {"directory/", "directory/browse.png"};
+		String [] keys = {"temp/logo.png", "temp/subdir/", "temp/subdir/index.png"};
+		
+		Map<String, S3Dto> map = new HashMap<String, S3Dto>();
+		for( String key: keys) {
+			//S3Dto dto = test(null, key);
+			//S3Dto dto = test("directory", key);
+			S3Dto dto = test("temp", key);
+			if( dto != null) map.put(dto.getKey(), dto);
+			
 		}
 		
-		jsonRes.setList(objectList);
-		return jsonRes;
+		System.out.println(map);
+	}
+	
+	public static S3Dto test(String prefix, String key) {
+		String delimiter = "/";
+	    if (prefix != null && !prefix.endsWith(delimiter)) {
+	        prefix += delimiter;
+	    }
+	    S3Dto dto = new S3Dto();
+	    
+	    if( prefix == null ) {  //  root
+	    	int pos = key.indexOf("/");
+	    	System.out.println("Key: " + key + "," + pos);
+	    	
+	    	if( pos == -1) { // file
+	    		dto.setDataType("file");
+	    	} else { // folder
+	    		key = key.substring(0, pos);
+	    		dto.setDataType("folder");
+	    	}
+    		dto.setKey(key);
+	    	
+	    } else { // listing subdirectories
+	    	int pos = key.lastIndexOf("/");
+	    	System.out.println("Before Key: " + key + "," + pos);
+	    	String current  = key.substring(pos+1);
+	    	
+	    	if( current.equals("")) { // Directory
+	    		current = key.substring(0, pos);
+	    		System.out.println("Directory: " + current );
+	    		dto.setKey("..");
+	    		dto.setDataType("folder");
+	    		dto.setParent(current);
+	    	} else { // file
+	    	//	if( current.)
+	    		dto.setKey(current);
+	    		dto.setDataType("file");
+	    		System.out.println("FileName: " + current );
+	    	}
+	    	
+	    	//System.out.println("After Key: " + key + "," + pos);
+	    }
+
+		
+		return dto;
+		
+//		
+//		int pos = key.lastIndexOf("/");
+//		if( pos == -1 ) { // root file
+//			
+//		} else { // This is directory or file. Apply filter
+//			current = key.substring(0, pos);
+//			key = key.substring(pos+1);
+//			
+//			if( key.equals("")) {
+//				key = "..";
+//				dataType = "folder";
+//			}
+//			
+//			if( parent.length() != 0) parent = current.substring(0, current.lastIndexOf("/"));
+//		}
+//			
+//		System.out.println(key.equals(""));
+//		System.out.println("Key: " + key);
+//		System.out.println("Current:" + current);
+//		System.out.println("Parent:" + parent);
+//		System.out.println("Type: " + dataType);
 	}
 	
 	@RequestMapping("/get")

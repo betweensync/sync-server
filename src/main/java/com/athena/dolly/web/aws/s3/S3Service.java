@@ -26,6 +26,9 @@ package com.athena.dolly.web.aws.s3;
 
 import java.io.File;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -86,7 +89,31 @@ public class S3Service {
 	 */
 	public List<S3ObjectSummary> listBucket(String bucketName) {
 		ObjectListing objectListing = s3.listObjects(new ListObjectsRequest().withBucketName(bucketName));
+	    System.out.println("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★");
+	    System.out.println(objectListing.getCommonPrefixes());
 		return objectListing.getObjectSummaries();
+	}
+	
+	/**
+	 * Retrieve object summaries in specific bucket
+	 * @param bucketName
+	 * @return
+	 */
+	public List<S3Dto> listBucket(String bucketName, String prefix) {
+	    ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
+	            .withBucketName(bucketName).withPrefix(prefix)
+	            .withDelimiter(null);
+	    ObjectListing objectListing = s3.listObjects(listObjectsRequest);
+	    
+	    List<S3Dto> list = new ArrayList<S3Dto>();
+		
+		for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+		    logger.info(" - " + objectSummary.getKey() + "  " +
+		                       "(size = " + objectSummary.getSize() + ")");
+		    list.add(makeDto(bucketName, objectSummary));
+		}
+		
+	    return list;
 	}
 
 	/**
@@ -164,9 +191,72 @@ public class S3Service {
 		GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, key);
 		URL url = s3.generatePresignedUrl(request);
 		return url;
-		
 	}
 	
 
+	private S3Dto makeDto(String bucketName, S3ObjectSummary objectSummary) {
+		S3Dto dto = new S3Dto();
+		
+		// Default value setting
+		dto.setBucketName(bucketName);
+	    dto.setLastModified(date2String(objectSummary.getLastModified(), "yyyy/MM/dd a KK:mm"));
+	    dto.setSize((objectSummary.getSize() / 1024) + "K");
+	    dto.setDataType(checkDataType(objectSummary.getKey()));
+		
+		// Caculate position
+		
+		String current = "";
+		String dataType = "file";
+		String parent = "";
+		
+		String key = objectSummary.getKey();
+		
+		dto.setUrl(presignedUrl(bucketName, key).toString());
+		// 1. lastIndexOf("/") == -1 is root directory's file
+		int pos = key.lastIndexOf("/");
+		if( pos == -1 ) { // root file
+			
+		} else { // This is directory or file. Apply filter
+			current = key.substring(0, pos);
+			key = key.substring(pos+1);
+			
+			if( key.equals("")) {
+				key = "..";
+				dataType = "folder";
+			}
+			if( parent.length() != 0) parent = current.substring(0, current.lastIndexOf("/"));
+		}
+		
+		dto.setKey(key);
+		dto.setDataType(dataType);
+		dto.setParent(parent);
+
+		// 2. lastIndexOf("/") == 
+		return dto;
+	}
 	
+	private String sanitizeKeyName(String key) {
+		int index = key.indexOf("/");
+		if( index != -1) {
+			// This if folder
+			return key.substring(0, index);
+		} else {
+			return key;
+		}
+	}
+	
+	private String checkDataType(String key) {
+		int index = key.indexOf("/");
+		if( index != -1) {
+			return "folder";
+		} else {
+			return "file";
+		}
+		
+	}
+	
+	private String date2String( Date d, String format ) {
+		SimpleDateFormat sdf = new SimpleDateFormat( format );
+		return sdf.format( d );
+	}
 }
