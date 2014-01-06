@@ -294,7 +294,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         logger.debug(s3Service.listBuckets().toString());
     }
 
-    public void sendMessageToClient(JsonNode msg) {;
+    public void sendMessageToClient(JsonNode msg) {
+        logger.info("sendMessageToClient", msg.textValue());
         ObjectMapper mapper = new ObjectMapper();
         String userid = msg.get("userid").textValue();
         String absolutePath = msg.get("absolutePath").textValue();
